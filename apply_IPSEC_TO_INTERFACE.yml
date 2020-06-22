@@ -1,0 +1,16 @@
+---
+- name: Apply IPSEC to Tunnel Interfaces
+  hosts: routers
+  gather_facts: True
+  vars_files:
+    - ~/Projects/ansible/vars/DMVPN_Parent_Interfaces
+
+  tasks:
+
+    - name: Apply IPSEC to Tunnel Interfaces
+      ios_config:
+        lines:
+          - tunnel protection ipsec profile IKEv2_PROFILE
+      with_items:
+        host: "{{ item.host }}"
+        parents: "{{ item.parent }}"
