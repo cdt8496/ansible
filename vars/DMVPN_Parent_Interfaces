@@ -1,0 +1,3 @@
+- { host: 'R1', parent: 'interface Tunnel 1' }
+- { host: 'R2', parent: 'interface Tunnel 2' }
+- { host: 'R3', parent: 'interface Tunnel 3' }
