@@ -1,0 +1,54 @@
+---
+- name: HUB DMVPN Router Config
+  hosts: R1
+  gather_facts: false
+
+  tasks:
+
+    - name: Configure DMVPN Underlay Interfaces
+      ios_config:
+        lines:
+          - ip address 200.1.1.1 255.255.255.0
+          - no shut
+        parents: interface GigabitEthernet0/1
+
+    - name: Configure DMVPN Tunnel Interface
+      ios_config:
+        lines:
+          - ip address 10.10.0.1 255.255.255.0
+          - ip mtu 1400
+          - ip nhrp authentication cisco123
+          - ip nhrp map multicast dynamic
+          - ip nhrp network-id 1
+          - ip nhrp redirect
+          - ip tcp adjust-mss 1360
+          - no ip redirects
+          - tunnel source 200.1.1.1
+          - tunnel mode gre multipoint
+        parents: interface tunnel 1
+
+    - name: Configure Static Routes for DMVPN Underlay to Spoke R2
+      ios_static_route:
+        prefix: 200.1.2.2
+        mask: 255.255.255.255
+        next_hop: 200.1.1.10
+
+    - name: Configure Static Routes for DMVPN Underlay to Spoke R3
+      ios_static_route:
+        prefix: 200.1.3.3
+        mask: 255.255.255.255
+        next_hop: 200.1.1.1
+
+
+    - name: Configure Named EIGRP Base for HUB Router
+      ios_config:
+        lines:
+          - network 10.10.0.1 255.255.255.255
+          - af-interface default
+          - passive-interface
+          - af-interface tunnel 1
+          - no passive-interface
+          - no split-horizon
+        parents: 
+          - router eigrp CHARLES
+          - address-family ipv4 unicast autonomous-system 5
